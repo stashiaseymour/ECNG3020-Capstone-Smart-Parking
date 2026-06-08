@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParkSmart – My Bookings</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--primary-dark:#1345b7;--primary-light:#ebf0ff;--bg:#f4f6fa;--white:#fff;--text:#0a0f1e;--muted:#6b7280;--light:#9ca3af;--border:#e5e7eb;--radius:8px;--free:#059669;--free-bg:#ecfdf5;--free-border:#a7f3d0;--occupied:#dc2626;--occupied-bg:#fef2f2;--occupied-border:#fca5a5;--reserved:#1a56db;--reserved-bg:#eff6ff;--reserved-border:#bfdbfe;--violation:#d97706;--violation-bg:#fffbeb;--violation-border:#fde68a;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+nav{position:sticky;top:0;z-index:300;background:#fff;border-bottom:1px solid var(--border);}
+.nav-inner{max-width:1240px;margin:0 auto;padding:0 32px;height:62px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-logo-mark{width:36px;height:36px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.nav-logo-mark svg{width:20px;height:20px;fill:white;}
+.nav-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:25px;font-weight:700;color:var(--text);letter-spacing:2px;text-transform:none;}
+.nav-wordmark span{color:var(--primary);}
+.nav-beta{font-family:'Inter',sans-serif;font-size:9px;font-weight:700;background:var(--primary);color:white;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;margin-left:2px;vertical-align:middle;}
+.nav-links{display:flex;align-items:center;}
+.nav-link{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--muted);padding:8px 14px;border-radius:6px;border:none;background:none;cursor:pointer;transition:color 0.15s,background 0.15s;text-decoration:none;display:inline-flex;align-items:center;}
+.nav-link:hover{color:var(--text);background:var(--bg);}
+.nav-link.active{color:var(--primary);font-weight:600;}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.nav-user-name{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);display:none;align-items:center;gap:8px;}
+.nav-avatar{width:30px;height:30px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;}
+.nav-signout{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--primary);background:none;border:1.5px solid var(--primary);border-radius:6px;padding:7px 18px;cursor:pointer;transition:all 0.15s;}
+.nav-signout:hover{background:var(--primary);color:#fff;}
+
+.main{max-width:1240px;margin:0 auto;padding:44px 32px 88px;}
+.page-hd{margin-bottom:32px;}
+.page-hd h1{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;text-transform:uppercase;letter-spacing:-0.3px;color:var(--text);}
+.page-hd p{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);margin-top:4px;}
+
+/* Active session */
+.active-section{margin-bottom:40px;}
+.section-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--light);margin-bottom:14px;}
+
+.active-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.active-top{height:4px;background:var(--primary);}
+.active-body{padding:24px;}
+.active-row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap;}
+.active-space{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:900;color:var(--text);letter-spacing:-1px;line-height:1;}
+.active-space-sub{font-family:'Inter',sans-serif;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--light);margin-top:4px;}
+.active-badge{display:inline-flex;align-items:center;gap:6px;background:var(--reserved-bg);border:1px solid var(--reserved-border);border-radius:4px;padding:6px 12px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.5px;}
+.active-badge.checked{background:var(--free-bg);border-color:var(--free-border);color:var(--free);}
+.active-badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.active-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:20px;}
+.stat-box{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;}
+.stat-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--light);margin-bottom:6px;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:var(--text);letter-spacing:-0.3px;}
+.stat-val.green{color:var(--free);}
+.stat-val.blue{color:var(--primary);}
+
+.active-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 20px;border-radius:6px;border:none;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;letter-spacing:0;}
+.btn svg{width:14px;height:14px;flex-shrink:0;}
+.btn-primary{background:var(--primary);color:#fff;}
+.btn-primary:hover{background:var(--primary-dark);}
+.btn-danger{background:var(--occupied-bg);color:var(--occupied);border:1px solid var(--occupied-border);}
+.btn-danger:hover{background:#fee2e2;}
+.btn-ghost{background:#fff;color:var(--muted);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--bg);}
+.btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+/* Empty states */
+.empty-box{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:48px 24px;text-align:center;}
+.empty-icon{width:48px;height:48px;background:var(--bg);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.empty-icon svg{width:24px;height:24px;fill:var(--light);}
+.empty-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;color:var(--text);margin-bottom:4px;}
+.empty-sub{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);}
+
+/* History */
+.history-section{}
+.history-list{display:flex;flex-direction:column;gap:12px;}
+.history-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.history-space{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--text);letter-spacing:-0.5px;min-width:48px;}
+.history-info{flex:1;min-width:180px;}
+.history-date{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+.history-duration{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);}
+.history-cost{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--text);letter-spacing:-0.3px;white-space:nowrap;}
+.history-cost-label{font-family:'Inter',sans-serif;font-size:10px;color:var(--light);font-weight:600;letter-spacing:0.5px;text-transform:uppercase;text-align:right;}
+
+/* Payment modal */
+.overlay{display:none;position:fixed;inset:0;background:rgba(10,15,30,0.72);z-index:600;align-items:center;justify-content:center;padding:20px;}
+.overlay.open{display:flex;}
+.modal{background:#fff;border-radius:12px;width:100%;max-width:420px;box-shadow:0 32px 64px rgba(0,0,0,0.22);overflow:hidden;animation:pop 0.2s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes pop{from{opacity:0;transform:scale(0.94) translateY(6px);}to{opacity:1;transform:scale(1);}}
+.modal-accent{height:4px;}
+.modal-top{padding:24px 26px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:14px;}
+.modal-ico{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.modal-ico svg{width:20px;height:20px;}
+.ico-payment{background:var(--free-bg);}
+.ico-payment svg{fill:var(--free);}
+.ico-confirm{background:var(--occupied-bg);}
+.ico-confirm svg{fill:var(--occupied);}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text);text-transform:uppercase;letter-spacing:0.3px;}
+.modal-sub{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+.modal-body{padding:20px 26px;}
+.modal-foot{padding:0 26px 24px;display:flex;flex-direction:column;gap:8px;}
+.detail-box{background:var(--bg);border-radius:6px;padding:14px 16px;margin-bottom:16px;border:1px solid var(--border);}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-family:'Inter',sans-serif;font-size:13px;border-bottom:1px solid var(--border);}
+.detail-row:last-child{border-bottom:none;padding-bottom:0;}
+.detail-row:first-child{padding-top:0;}
+.dk{color:var(--muted);}
+.dv{font-weight:600;color:var(--text);}
+.dv.big{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--free);}
+.or-divider{font-family:'Inter',sans-serif;text-align:center;font-size:11px;color:var(--light);padding:2px 0;}
+.payment-methods{display:flex;gap:8px;margin-bottom:16px;}
+.pay-method{flex:1;padding:12px 8px;border-radius:6px;border:1.5px solid var(--border);background:#fff;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;text-align:center;transition:all 0.15s;}
+.pay-method:hover,.pay-method.active{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
+.pay-note{font-family:'Inter',sans-serif;font-size:11px;color:var(--light);text-align:center;margin-bottom:4px;}
+
+footer{background:#06101f;padding:44px 32px;}
+.foot-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.foot-brand{display:flex;align-items:center;gap:12px;}
+.foot-logo{width:32px;height:32px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.foot-logo svg{width:18px;height:18px;fill:#fff;}
+.foot-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:0.5px;}
+.foot-tag{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.25);margin-top:1px;}
+.foot-copy{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.2);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="user.html" class="nav-logo">
+      <div class="nav-logo-mark"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+      <div class="nav-wordmark">Park<span>Smart</span><span class="nav-beta">BETA</span></div>
+    </a>
+    <div class="nav-links">
+  <a href="user.html" class="nav-link">Home</a>
+  <a href="spaces.html" class="nav-link">Find a Space</a>
+  <a href="my-bookings.html" class="nav-link active">My Bookings</a>
+  <a href="#" class="nav-link" onclick="alert('Help — coming soon!')">Help</a>
+</div>
+    <div class="nav-right">
+      <div class="nav-user-name" id="navUser"><div class="nav-avatar" id="navAvatar">?</div><span id="navName"></span></div>
+      <button class="nav-signout" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-hd">
+    <h1>My Bookings</h1>
+    <p>Your active session and parking history</p>
+  </div>
+
+  <!-- ACTIVE SESSION -->
+  <div class="active-section">
+    <div class="section-label">Active Session</div>
+    <div id="activeSessionContainer"></div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section">
+    <div class="section-label">Past Sessions</div>
+    <div id="historyContainer"></div>
+  </div>
+</div>
+
+<!-- END SESSION CONFIRM MODAL -->
+<div id="endSessionOverlay" class="overlay">
+  <div class="modal">
+    <div class="modal-accent" style="background:var(--occupied)"></div>
+    <div class="modal-top">
+      <div class="modal-ico ico-confirm">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+      </div>
+      <div>
+        <div class="modal-title">End Session?</div>
+        <div class="modal-sub">Make sure your vehicle has left the space before confirming</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="detail-box">
+        <div class="detail-row"><span class="dk">Space</span><span class="dv" id="endNodeId">—</span></div>
+        <div class="detail-row"><span class="dk">Estimated duration</span><span class="dv" id="endDuration">—</span></div>
+        <div class="detail-row"><span class="dk">Estimated cost</span><span class="dv" id="endCost">—</span></div>
+      </div>
+      <p style="font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);line-height:1.65;">The final amount will be calculated at the moment of ending your session. Rate: $100 JMD / hour.</p>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-danger" id="confirmEndBtn" onclick="confirmEndSession()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Yes, End Session
+      </button>
+      <div class="or-divider">or</div>
+      <button class="btn btn-ghost" onclick="hideEndModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div id="paymentOverlay" class="overlay">
+  <div class="modal">
+    <div class="modal-accent" style="background:var(--free)"></div>
+    <div class="modal-top">
+      <div class="modal-ico ico-payment">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+      </div>
+      <div>
+        <div class="modal-title">Payment Summary</div>
+        <div class="modal-sub">Session ended — please complete payment</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="detail-box">
+        <div class="detail-row"><span class="dk">Space</span><span class="dv" id="payNodeId">—</span></div>
+        <div class="detail-row"><span class="dk">Duration</span><span class="dv" id="payDuration">—</span></div>
+        <div class="detail-row"><span class="dk">Rate</span><span class="dv">$100 JMD / hour</span></div>
+        <div class="detail-row"><span class="dk">Total</span><span class="dv big" id="payTotal">—</span></div>
+      </div>
+      <div class="section-label" style="margin-bottom:8px;">Select Payment Method</div>
+      <div class="payment-methods">
+        <div class="pay-method active" onclick="selectMethod(this)">Cash</div>
+<div class="pay-method" onclick="selectMethod(this)">Debit / Credit Card</div>
+      </div>
+      <div class="pay-note">This is a simulated payment for demonstration purposes</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="completePay()">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+        Complete Payment
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <div class="foot-logo"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+      <div><div class="foot-name">ParkSmart</div><div class="foot-tag">Smart Parking Management System</div></div>
+    </div>
+    <div class="foot-copy">© 2025 ParkSmart · Real-time availability powered by IoT sensors</div>
+  </div>
+</footer>
+
+<script>
+const BASE_URL      = "https://smart-parking-backend-u60i.onrender.com";
+const STATUS_API    = `${BASE_URL}/api/parking/status`;
+const END_API       = `${BASE_URL}/api/session/end`;
+const SESSIONS_API  = `${BASE_URL}/api/my-sessions`;
+const RATE_PER_HR   = 100;
+
+const storedUser    = localStorage.getItem("ps_user");
+const currentUser   = storedUser ? JSON.parse(storedUser) : null;
+const currentUserId = currentUser ? currentUser.user_id : null;
+const token         = localStorage.getItem("ps_token");
+
+if (!currentUser || !token) window.location.href = "index.html";
+
+document.getElementById("navUser").style.display = "flex";
+document.getElementById("navName").textContent   = currentUser.name;
+document.getElementById("navAvatar").textContent = currentUser.name.charAt(0).toUpperCase();
+
+function signOut() {
+  localStorage.removeItem("ps_token");
+  localStorage.removeItem("ps_user");
+  window.location.href = "index.html";
+}
+
+function fmt12(ts) {
+  const d = new Date(ts * 1000);
+  let h = d.getHours(), m = d.getMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m.toString().padStart(2,'0')} ${ampm}`;
+}
+
+function fmtDate(ts) {
+  const d = new Date(ts * 1000);
+  return d.toLocaleDateString("en-JM", { weekday:"short", month:"short", day:"numeric" });
+}
+
+function fmtDuration(sec) {
+  if (sec < 60) return `${sec}s`;
+  const m = Math.floor(sec / 60), s = sec % 60;
+  if (m < 60) return `${m}m ${s}s`;
+  const h = Math.floor(m / 60), rm = m % 60;
+  return `${h}h ${rm}m`;
+}
+
+function estCost(sec) {
+  return (sec / 3600 * RATE_PER_HR).toFixed(2);
+}
+
+// ── Active session state ──
+let activeNode = null;
+let sessionTimer = null;
+
+function elapsedSince(ts) {
+  return Math.max(0, Math.floor(Date.now() / 1000) - ts);
+}
+
+// ── Load everything ──
+async function loadPage() {
+  try {
+    const [statusRes, sessionsRes] = await Promise.all([
+      fetch(STATUS_API),
+      fetch(SESSIONS_API, { headers: { Authorization: `Bearer ${token}` } })
+    ]);
+
+    const statusData   = await statusRes.json();
+    const sessionsData = await sessionsRes.json();
+
+    renderActive(statusData);
+    renderHistory(sessionsData);
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderActive(data) {
+  const container = document.getElementById("activeSessionContainer");
+  activeNode = null;
+
+  // Find any space reserved by this user and checked in
+  for (const [id, n] of Object.entries(data)) {
+    if (n.reserved_by === currentUserId && n.final_status !== "OFFLINE") {
+      activeNode = { id, ...n };
+      break;
+    }
+  }
+
+  if (!activeNode) {
+    container.innerHTML = `
+      <div class="empty-box">
+        <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z"/></svg></div>
+        <div class="empty-title">No Active Session</div>
+        <div class="empty-sub">Reserve a parking space to get started</div>
+      </div>`;
+    if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+    return;
+  }
+
+  const isCheckedIn  = activeNode.checked_in;
+  const checkinTime  = activeNode.checkin_time || null;
+  const typeLabel    = activeNode.id.startsWith("O") ? "Outdoor Bay" : "Indoor Bay";
+
+  container.innerHTML = `
+    <div class="active-card">
+      <div class="active-top"></div>
+      <div class="active-body">
+        <div class="active-row1">
+          <div>
+            <div class="active-space">${activeNode.id}</div>
+            <div class="active-space-sub">${typeLabel}</div>
+          </div>
+          <div class="active-badge ${isCheckedIn ? 'checked' : ''}">
+            <div class="active-badge-dot"></div>
+            ${isCheckedIn ? 'Checked In' : 'Reserved — Awaiting Check-in'}
+          </div>
+        </div>
+        <div class="active-stats">
+          <div class="stat-box">
+            <div class="stat-label">Status</div>
+            <div class="stat-val ${activeNode.sensor_status === 'FREE' ? 'green' : ''}">${activeNode.final_status}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">${isCheckedIn ? 'Duration' : 'Reserved At'}</div>
+            <div class="stat-val blue" id="durationDisplay">${isCheckedIn && checkinTime ? fmtDuration(elapsedSince(checkinTime)) : fmt12(activeNode.reservation_expiry ? activeNode.reservation_expiry - (activeNode.reservation_expiry - (activeNode.server_timestamp || 0)) : 0)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">${isCheckedIn ? 'Est. Cost' : 'Expires At'}</div>
+            <div class="stat-val" id="costDisplay">${isCheckedIn && checkinTime ? `$${estCost(elapsedSince(checkinTime))} JMD` : fmt12(activeNode.reservation_expiry)}</div>
+          </div>
+        </div>
+        <div class="active-actions">
+          ${isCheckedIn
+            ? `<button class="btn btn-danger" onclick="openEndModal('${activeNode.id}')">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                End Session
+               </button>`
+            : `<div style="font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);padding:10px 0;">
+                Waiting for QR scan check-in at the barrier
+               </div>`
+          }
+        </div>
+      </div>
+    </div>`;
+
+  // Live timer if checked in
+  if (isCheckedIn && checkinTime) {
+    if (sessionTimer) clearInterval(sessionTimer);
+    sessionTimer = setInterval(() => {
+      const elapsed = elapsedSince(checkinTime);
+      const durEl   = document.getElementById("durationDisplay");
+      const costEl  = document.getElementById("costDisplay");
+      if (durEl)  durEl.textContent  = fmtDuration(elapsed);
+      if (costEl) costEl.textContent = `$${estCost(elapsed)} JMD`;
+    }, 1000);
+  }
+}
+
+function renderHistory(sessions) {
+  const container = document.getElementById("historyContainer");
+
+  if (!sessions || sessions.length === 0) {
+    container.innerHTML = `
+      <div class="empty-box">
+        <div class="empty-icon"><svg viewBox="0 0 24 24"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg></div>
+        <div class="empty-title">No Past Sessions</div>
+        <div class="empty-sub">Your completed parking sessions will appear here</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="history-list">${sessions.map(s => {
+    const cost     = s.cost_jmd != null ? `$${s.cost_jmd.toFixed(2)}` : "—";
+    const dateStr  = fmtDate(s.end_time);
+    const timeStr  = `${fmt12(s.start_time)} – ${fmt12(s.end_time)}`;
+    const durStr   = fmtDuration(s.duration_seconds);
+    return `
+      <div class="history-card">
+        <div class="history-space">${s.node_id}</div>
+        <div class="history-info">
+          <div class="history-date">${dateStr} &nbsp;·&nbsp; ${timeStr}</div>
+          <div class="history-duration">${durStr}</div>
+        </div>
+        <div>
+          <div class="history-cost">${cost} <span style="font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:var(--muted);">JMD</span></div>
+          <div class="history-cost-label">Total Paid</div>
+        </div>
+      </div>`;
+  }).join("")}</div>`;
+}
+
+// ── End session modal ──
+let pendingEndNode = null;
+
+function openEndModal(nodeId) {
+  pendingEndNode = nodeId;
+  const checkinTime = activeNode?.checkin_time;
+  const elapsed     = checkinTime ? elapsedSince(checkinTime) : 0;
+
+  document.getElementById("endNodeId").textContent   = nodeId;
+  document.getElementById("endDuration").textContent = fmtDuration(elapsed);
+  document.getElementById("endCost").textContent     = `$${estCost(elapsed)} JMD`;
+  document.getElementById("endSessionOverlay").classList.add("open");
+}
+
+function hideEndModal() {
+  pendingEndNode = null;
+  document.getElementById("endSessionOverlay").classList.remove("open");
+}
+
+async function confirmEndSession() {
+  if (!pendingEndNode) return;
+
+  const btn = document.getElementById("confirmEndBtn");
+  btn.disabled = true;
+  btn.textContent = "Checking...";
+
+  try {
+    const res  = await fetch(END_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ node_id: pendingEndNode })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      hideEndModal();
+      // Show payment modal
+      document.getElementById("payNodeId").textContent   = data.node_id;
+      document.getElementById("payDuration").textContent = fmtDuration(data.duration_seconds);
+      document.getElementById("payTotal").textContent    = `$${data.cost_jmd.toFixed(2)} JMD`;
+      document.getElementById("paymentOverlay").classList.add("open");
+      if (sessionTimer) { clearInterval(sessionTimer); sessionTimer = null; }
+    } else {
+      alert(data.detail || "Could not end session. Make sure your vehicle has left the space.");
+    }
+  } catch(e) {
+    alert("Network error — please try again.");
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Yes, End Session`;
+}
+
+function selectMethod(el) {
+  document.querySelectorAll(".pay-method").forEach(m => m.classList.remove("active"));
+  el.classList.add("active");
+}
+
+function completePay() {
+  document.getElementById("paymentOverlay").classList.remove("open");
+  loadPage();
+}
+
+document.querySelectorAll(".overlay").forEach(o => {
+  o.addEventListener("click", e => { if (e.target === o) o.classList.remove("open"); });
+});
+
+loadPage();
+setInterval(loadPage, 10000);
+</script>
+</body>
+</html>

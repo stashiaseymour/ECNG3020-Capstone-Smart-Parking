@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParkSmart – Smart Parking Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1a56db;--primary-dark:#1345b7;--primary-light:#ebf0ff;
+  --bg:#f4f6fa;--white:#fff;--text:#0a0f1e;--muted:#6b7280;--light:#9ca3af;
+  --border:#e5e7eb;--radius:8px;
+  --free:#059669;--occupied:#dc2626;--reserved:#1a56db;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:#fff;color:var(--text);-webkit-font-smoothing:antialiased;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;background:rgba(255,255,255,0.97);border-bottom:1px solid var(--border);}
+.nav-inner{max-width:1240px;margin:0 auto;padding:0 32px;height:62px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-p{width:36px;height:36px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.nav-p span{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:white;line-height:1;}
+.nav-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:25px;font-weight:700;color:var(--text);letter-spacing:2px;text-transform:none;}
+.nav-wordmark em{color:var(--primary);font-style:normal;}
+.nav-beta{font-family:'Inter',sans-serif;font-size:9px;font-weight:700;background:var(--primary);color:white;padding:2px 6px;border-radius:3px;letter-spacing:0.5px;margin-left:2px;vertical-align:middle;}
+.nav-links{display:flex;align-items:center;}
+.nav-link{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;color:var(--muted);padding:8px 16px;border:none;background:none;cursor:pointer;transition:color 0.15s;text-decoration:none;display:inline-flex;align-items:center;position:relative;}
+.nav-link:hover{color:var(--text);}
+.nav-link.active{color:var(--primary);font-weight:600;}
+.nav-link + .nav-link::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);height:14px;width:1px;background:var(--border);}
+.nav-right{display:flex;align-items:center;gap:12px;}
+.nav-user-name{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--text);display:none;align-items:center;gap:8px;}
+.nav-avatar{width:30px;height:30px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;}
+.nav-signout{font-family:'Inter',sans-serif;font-size:13px;font-weight:600;color:var(--primary);background:none;border:1.5px solid var(--primary);border-radius:6px;padding:7px 18px;cursor:pointer;transition:all 0.15s;}
+.nav-signout:hover{background:var(--primary);color:#fff;}
+
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;align-items:center;overflow:hidden;background:#06101f;}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0.4;}
+.hero-inner{position:relative;z-index:2;max-width:1240px;margin:0 auto;padding:120px 32px 80px;width:100%;display:flex;align-items:center;justify-content:space-between;gap:60px;}
+.hero-left{max-width:620px;}
+.hero-eyebrow{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,0.45);margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.live-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.hero h1{font-family:'Barlow Condensed',sans-serif;font-size:clamp(60px,8vw,100px);font-weight:900;color:#fff;line-height:0.92;letter-spacing:-1px;text-transform:uppercase;margin-bottom:24px;}
+.hero h1 .accent{color:#60a5fa;}
+.hero-sub{font-family:'Barlow',sans-serif;font-size:17px;font-weight:400;color:rgba(255,255,255,0.55);line-height:1.75;margin-bottom:40px;max-width:480px;}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;}
+.btn-hero-primary{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;background:#fff;color:var(--primary);border:none;border-radius:6px;padding:14px 28px;cursor:pointer;transition:all 0.15s;letter-spacing:0;}
+.btn-hero-primary:hover{background:#f0f4ff;transform:translateY(-1px);}
+.btn-hero-secondary{font-family:'Inter',sans-serif;font-size:14px;font-weight:600;background:transparent;color:rgba(255,255,255,0.8);border:1.5px solid rgba(255,255,255,0.3);border-radius:6px;padding:14px 28px;cursor:pointer;transition:all 0.15s;}
+.btn-hero-secondary:hover{border-color:rgba(255,255,255,0.6);color:#fff;}
+.hero-panel{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px 36px;min-width:260px;}
+.panel-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:24px;}
+.panel-stat{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.panel-stat:last-child{border-bottom:none;padding-bottom:0;}
+.panel-stat-left{display:flex;align-items:center;gap:10px;}
+.panel-dot{width:7px;height:7px;border-radius:50%;}
+.panel-stat-name{font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,0.45);}
+.panel-stat-val{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:#fff;letter-spacing:-0.5px;}
+.scroll-hint{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:rgba(255,255,255,0.3);font-family:'Inter',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;z-index:2;}
+.scroll-arrow{width:20px;height:20px;border-right:2px solid rgba(255,255,255,0.3);border-bottom:2px solid rgba(255,255,255,0.3);transform:rotate(45deg);animation:scrollBounce 1.5s infinite;}
+@keyframes scrollBounce{0%,100%{transform:rotate(45deg) translateY(0);}50%{transform:rotate(45deg) translateY(4px);}}
+
+/* STATS STRIP */
+.stats-strip{background:#0a0f1e;padding:28px 0;}
+.stats-inner{max-width:1240px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:repeat(4,1fr);gap:0;}
+.stat-item{text-align:center;padding:0 24px;border-right:1px solid rgba(255,255,255,0.08);}
+.stat-item:last-child{border-right:none;}
+.stat-num{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1;}
+.stat-num em{color:#60a5fa;font-style:normal;}
+.stat-desc{font-family:'Inter',sans-serif;font-size:12px;color:rgba(255,255,255,0.35);margin-top:4px;letter-spacing:0.3px;}
+
+/* HOW IT WORKS */
+.how{padding:100px 0;background:#fff;}
+.how-inner{max-width:1240px;margin:0 auto;padding:0 32px;}
+.section-eyebrow{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--primary);margin-bottom:12px;}
+.section-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(36px,4vw,52px);font-weight:900;text-transform:uppercase;color:var(--text);letter-spacing:-0.5px;margin-bottom:16px;}
+.section-sub{font-family:'Barlow',sans-serif;font-size:16px;color:var(--muted);max-width:480px;line-height:1.7;margin-bottom:64px;}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:32px;position:relative;}
+.steps::before{content:'';position:absolute;top:28px;left:10%;right:10%;height:1px;background:var(--border);z-index:0;}
+.step{position:relative;z-index:1;}
+.step-num{width:56px;height:56px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:white;margin-bottom:20px;}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;text-transform:uppercase;color:var(--text);margin-bottom:8px;letter-spacing:0.3px;}
+.step-desc{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);line-height:1.65;}
+
+/* FEATURES */
+.features{padding:100px 0;background:var(--bg);}
+.features-inner{max-width:1240px;margin:0 auto;padding:0 32px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.features-text{}
+.features-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.feat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;}
+.feat-icon{width:40px;height:40px;background:var(--primary-light);border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+.feat-icon svg{width:20px;height:20px;fill:var(--primary);}
+.feat-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;text-transform:uppercase;color:var(--text);margin-bottom:6px;letter-spacing:0.3px;}
+.feat-desc{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);line-height:1.6;}
+
+/* CTA SECTION */
+.cta-section{padding:100px 0;background:#0a0f1e;}
+.cta-inner{max-width:1240px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;gap:48px;flex-wrap:wrap;}
+.cta-left h2{font-family:'Barlow Condensed',sans-serif;font-size:clamp(40px,4vw,60px);font-weight:900;text-transform:uppercase;color:#fff;letter-spacing:-0.5px;line-height:0.95;margin-bottom:16px;}
+.cta-left h2 em{color:#60a5fa;font-style:normal;}
+.cta-left p{font-family:'Barlow',sans-serif;font-size:16px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:440px;}
+.cta-right{display:flex;flex-direction:column;gap:12px;min-width:240px;}
+.btn-cta-primary{font-family:'Inter',sans-serif;font-size:14px;font-weight:700;background:var(--primary);color:white;border:none;border-radius:6px;padding:16px 32px;cursor:pointer;transition:all 0.15s;text-align:center;text-decoration:none;display:block;}
+.btn-cta-primary:hover{background:var(--primary-dark);}
+.btn-cta-ghost{font-family:'Inter',sans-serif;font-size:13px;font-weight:500;background:transparent;color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:14px 32px;cursor:pointer;transition:all 0.15s;text-align:center;text-decoration:none;display:block;}
+.btn-cta-ghost:hover{color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.3);}
+
+/* FOOTER */
+footer{background:#06101f;padding:44px 32px;border-top:1px solid rgba(255,255,255,0.06);}
+.foot-inner{max-width:1240px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.foot-brand{display:flex;align-items:center;gap:12px;}
+.foot-p{width:32px;height:32px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.foot-p span{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:white;line-height:1;}
+.foot-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:#fff;text-transform:uppercase;letter-spacing:0.5px;}
+.foot-tag{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.25);margin-top:1px;}
+.foot-copy{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.2);}
+
+@media(max-width:900px){
+  .steps{grid-template-columns:1fr 1fr;}
+  .steps::before{display:none;}
+  .features-inner{grid-template-columns:1fr;}
+  .hero-panel{display:none;}
+  .stats-inner{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .steps{grid-template-columns:1fr;}
+  .stats-inner{grid-template-columns:1fr 1fr;}
+  .nav-link{display:none;}
+  .nav-link.active{display:inline-flex;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="user.html" class="nav-logo">
+      <div class="nav-wordmark">Park<em>Smart</em></div>
+    </a>
+    <div class="nav-links">
+      <a href="user.html" class="nav-link active">Home</a>
+      <a href="spaces.html" class="nav-link">Find a Space</a>
+      <a href="my-bookings.html" class="nav-link">My Bookings</a>
+      <a href="#" class="nav-link" onclick="alert('Help — coming soon!')">Help</a>
+    </div>
+    <div class="nav-right">
+      <div class="nav-user-name" id="navUser"><div class="nav-avatar" id="navAvatar">?</div><span id="navName"></span></div>
+      <button class="nav-signout" onclick="signOut()">Sign Out</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <video autoplay muted loop playsinline class="hero-video" id="heroBg">
+    <source src="hero-bg.mp4" type="video/mp4">
+  </video>
+  
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="hero-eyebrow"><div class="live-dot"></div>Live Availability Updates</div>
+      <h1>Park<br>Smarter,<br><span class="accent">Not Harder</span></h1>
+      <p class="hero-sub">Real-time parking availability at your fingertips. Reserve a space in seconds and receive a QR code for instant access.</p>
+      <div class="hero-cta">
+        <button class="btn-hero-primary" onclick="window.location.href='spaces.html'">Find a Parking Space</button>
+        <button class="btn-hero-secondary" onclick="document.getElementById('how').scrollIntoView({behavior:'smooth'})">How It Works</button>
+      </div>
+    </div>
+    <div class="hero-panel">
+      <div class="panel-label">Live Availability</div>
+      <div class="panel-stat">
+        <div class="panel-stat-left"><div class="panel-dot" style="background:#22c55e"></div><div class="panel-stat-name">Available</div></div>
+        <div class="panel-stat-val" id="h-free">—</div>
+      </div>
+      <div class="panel-stat">
+        <div class="panel-stat-left"><div class="panel-dot" style="background:#f87171"></div><div class="panel-stat-name">Occupied</div></div>
+        <div class="panel-stat-val" id="h-occupied">—</div>
+      </div>
+      <div class="panel-stat">
+        <div class="panel-stat-left"><div class="panel-dot" style="background:#60a5fa"></div><div class="panel-stat-name">Reserved</div></div>
+        <div class="panel-stat-val" id="h-reserved">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-num" id="stat-total">—</div>
+      <div class="stat-desc">Total Parking Spaces</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num"><em id="stat-free">—</em></div>
+      <div class="stat-desc">Available Right Now</div>
+    </div>
+    <div class="stat-item">
+  <div class="stat-num"><em>Pay</em></div>
+  <div class="stat-desc">Hourly Rate Applies</div>
+</div>
+    <div class="stat-item">
+      <div class="stat-num"><em>24</em>/7</div>
+      <div class="stat-desc">Live Sensor Monitoring</div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how" id="how">
+  <div class="how-inner">
+    <div class="section-eyebrow">How It Works</div>
+    <div class="section-title">Park in 4 Simple Steps</div>
+    <p class="section-sub">From reservation to payment — the entire process is handled through ParkSmart.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Reserve a Space</div>
+        <p class="step-desc">Browse available parking spaces in real time and reserve the one you want. Set your duration and confirm in seconds.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Get Your QR Code</div>
+        <p class="step-desc">After confirming your reservation, you receive a unique QR code. Screenshot it — you will need it at the entrance.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Check In at Barrier</div>
+        <p class="step-desc">Show your QR code to the attendant at the entrance barrier. They scan it to verify and activate your session.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Park & Pay</div>
+        <p class="step-desc">Park your vehicle. When you are done, drive out and end your session from My Bookings. Your total is calculated automatically.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="features">
+  <div class="features-inner">
+    <div class="features-text">
+      <div class="section-eyebrow">Why ParkSmart</div>
+      <div class="section-title">Smarter Parking Starts Here</div>
+      <p class="section-sub" style="margin-bottom:32px;">ParkSmart uses IoT sensors and real-time data to give you accurate, up-to-the-second parking availability — no guessing, no circling.</p>
+      <button class="btn-hero-primary" style="background:var(--primary);color:#fff;display:inline-flex;" onclick="window.location.href='spaces.html'">View Available Spaces</button>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        </div>
+        <div class="feat-title">Live Sensor Data</div>
+        <p class="feat-desc">IoT sensors update space availability in real time — indoor and outdoor bays monitored continuously.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+        </div>
+        <div class="feat-title">Instant Reservation</div>
+        <p class="feat-desc">Reserve your space in under 30 seconds. Choose your duration and get confirmed immediately.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M3 11h2v2H3zm0 4h2v2H3zm4-4h2v2H7zm0 4h2v2H7zM3 7h2v2H3zm4 0h2v2H7zm8 8h2v2h-2zm0-4h2v2h-2zm4 4h2v2h-2zm0-4h2v2h-2zm-8 4h2v2h-2zm0-4h2v2h-2zm4-8v4H7V3h4zm-2 2h-2v2h2V5zm8-2v4h-6V3h6zm-2 2h-2v2h2V5zM7 13v4H3v-4h4zm-2 2H3v2h2v-2z"/></svg>
+        </div>
+        <div class="feat-title">QR Code Entry</div>
+        <p class="feat-desc">Your reservation generates a unique QR code for verified check-in at the entrance barrier.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">
+          <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+        </div>
+        <div class="feat-title">Automated Billing</div>
+        <p class="feat-desc">Session duration is tracked automatically. Pay only for the time you actually use at $100 JMD/hour.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-inner">
+    <div class="cta-left">
+      <h2>Ready to<br><em>Park Smarter?</em></h2>
+      <p>Find an available space right now. Real-time availability updated every few seconds across all bays.</p>
+    </div>
+    <div class="cta-right">
+      <a href="spaces.html" class="btn-cta-primary">Find a Parking Space</a>
+      <a href="my-bookings.html" class="btn-cta-ghost">View My Bookings</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <div class="foot-p"><span>P</span></div>
+      <div>
+        <div class="foot-name">ParkSmart</div>
+        <div class="foot-tag">Smart Parking Management System</div>
+      </div>
+    </div>
+    <div class="foot-copy">© 2025 ParkSmart · Real-time availability powered by IoT sensors</div>
+  </div>
+</footer>
+
+<script>
+const BASE_URL   = "https://smart-parking-backend-u60i.onrender.com";
+const STATUS_API = `${BASE_URL}/api/parking/status`;
+
+const storedUser  = localStorage.getItem("ps_user");
+const currentUser = storedUser ? JSON.parse(storedUser) : null;
+if (!currentUser) window.location.href = "index.html";
+
+document.getElementById("navUser").style.display = "flex";
+document.getElementById("navName").textContent   = currentUser.name;
+document.getElementById("navAvatar").textContent = currentUser.name.charAt(0).toUpperCase();
+
+function signOut() {
+  localStorage.removeItem("ps_token");
+  localStorage.removeItem("ps_user");
+  window.location.href = "index.html";
+}
+
+async function loadStats() {
+  try {
+    const res  = await fetch(STATUS_API);
+    const data = await res.json();
+    let total=0, free=0, occupied=0, reserved=0;
+    for (const id in data) {
+      total++;
+      const s = data[id].final_status;
+      if      (s==="FREE")     free++;
+      else if (s==="OCCUPIED") occupied++;
+      else if (s==="RESERVED") reserved++;
+    }
+    document.getElementById("h-free").textContent     = free;
+    document.getElementById("h-occupied").textContent = occupied;
+    document.getElementById("h-reserved").textContent = reserved;
+    document.getElementById("stat-total").textContent = total;
+    document.getElementById("stat-free").textContent  = free;
+  } catch(e) { console.error(e); }
+}
+
+const vid = document.getElementById("heroBg");
+if (vid) vid.playbackRate = 0.2;
+
+loadStats();
+setInterval(loadStats, 5000);
+</script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParkSmart – Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--primary-dark:#1345b7;--primary-light:#ebf0ff;--bg:#f4f6fa;--white:#fff;--text:#0a0f1e;--border:#e5e7eb;--error:#dc2626;--error-bg:#fef2f2;--success:#059669;--success-bg:#ecfdf5;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+
+nav{background:var(--white);border-bottom:1px solid var(--border);}
+.nav-inner{max-width:1240px;margin:0 auto;padding:0 32px;height:62px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.nav-p{width:36px;height:36px;background:var(--primary);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.nav-p span{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:white;line-height:1;}
+.nav-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;color:var(--text);letter-spacing:0.5px;text-transform:uppercase;}
+.nav-wordmark em{color:var(--primary);font-style:normal;}
+.nav-right{font-family:'Inter',sans-serif;font-size:13px;color:var(--text);}
+.nav-right a{color:var(--primary);font-weight:600;text-decoration:none;}
+.nav-right a:hover{text-decoration:underline;}
+
+.page{flex:1;display:flex;align-items:center;justify-content:center;padding:48px 20px;}
+
+.card{background:var(--white);border-radius:12px;border:1px solid var(--border);box-shadow:0 8px 32px rgba(0,0,0,0.08);width:100%;max-width:440px;overflow:hidden;}
+
+.card-header{background:#0a0f1e;padding:36px 40px 32px;}
+.card-header-eyebrow{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,0.55);margin-bottom:10px;}
+.card-header h1{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;text-transform:uppercase;color:#fff;letter-spacing:-0.3px;margin-bottom:6px;}
+.card-header p{font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.6;}
+
+.card-body{padding:36px 40px 40px;}
+
+.alert{display:none;padding:12px 14px;border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:500;margin-bottom:20px;border:1px solid;}
+.alert.show{display:block;}
+.alert-error{background:var(--error-bg);color:var(--error);border-color:#fca5a5;}
+.alert-success{background:var(--success-bg);color:var(--success);border-color:#a7f3d0;}
+
+.field{margin-bottom:20px;}
+.field label{display:block;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text);margin-bottom:6px;}
+.pw-wrap{position:relative;}
+input[type="email"],input[type="password"],input[type="text"]{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--white);transition:border-color 0.15s,box-shadow 0.15s;outline:none;}
+input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,86,219,0.08);}
+input::placeholder{color:#c0c8d4;}
+.toggle-pw{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:#9ca3af;padding:0;letter-spacing:0.3px;}
+.toggle-pw:hover{color:var(--text);}
+
+.field-foot{display:flex;justify-content:flex-end;margin-top:6px;}
+.forgot-link{font-family:'Inter',sans-serif;font-size:12px;color:var(--primary);text-decoration:none;font-weight:500;}
+.forgot-link:hover{text-decoration:underline;}
+
+.btn-submit{width:100%;padding:13px;background:var(--primary);color:white;border:none;border-radius:6px;font-family:'Inter',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;letter-spacing:0;}
+.btn-submit:hover{background:var(--primary-dark);}
+.btn-submit:disabled{opacity:0.6;cursor:not-allowed;}
+.spinner{width:15px;height:15px;border:2px solid rgba(255,255,255,0.35);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;display:none;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.divider{display:flex;align-items:center;gap:12px;margin:24px 0;font-family:'Inter',sans-serif;font-size:11px;color:#9ca3af;letter-spacing:0.3px;text-transform:uppercase;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.btn-register{width:100%;padding:12px;background:var(--white);color:var(--primary);border:1.5px solid var(--primary);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;text-align:center;text-decoration:none;display:block;}
+.btn-register:hover{background:var(--primary-light);}
+
+footer{background:#0a0f1e;padding:28px 32px;text-align:center;}
+.foot-copy{font-family:'Inter',sans-serif;font-size:11px;color:rgba(255,255,255,0.2);}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <div class="nav-wordmark">Park<em>Smart</em></div>
+    </a>
+    <div class="nav-right">New here? <a href="register.html">Create an account</a></div>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-eyebrow">Welcome Back</div>
+      <h1>Sign In</h1>
+      <p>Enter your credentials to access your ParkSmart account.</p>
+    </div>
+    <div class="card-body">
+
+      <div class="alert alert-error" id="errorAlert"><span id="errorMsg"></span></div>
+      <div class="alert alert-success" id="successAlert"><span id="successMsg"></span></div>
+
+      <div class="field">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password">
+          <button class="toggle-pw" onclick="togglePw('password',this)" type="button">Show</button>
+        </div>
+        <div class="field-foot">
+          <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+        </div>
+      </div>
+
+      <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+        <div class="spinner" id="spinner"></div>
+        <span id="btnText">Sign In</span>
+      </button>
+
+      <div class="divider">or</div>
+      <a href="register.html" class="btn-register">Create a Free Account</a>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-copy">© 2025 ParkSmart · Smart Parking Management System</div>
+</footer>
+
+<script>
+const BASE = "https://smart-parking-backend-u60i.onrender.com";
+
+const token = localStorage.getItem("ps_token");
+if (token) {
+  try {
+    const role = JSON.parse(atob(token.split(".")[1])).role;
+    redirectByRole(role);
+  } catch(e) {}
+}
+
+function redirectByRole(role) {
+  if      (role === "admin")   window.location.href = "admin-dashboard.html";
+  else if (role === "display") window.location.href = "display.html";
+  else                         window.location.href = "user.html";
+}
+
+function togglePw(id, btn) {
+  const input = document.getElementById(id);
+  if (input.type === "password") { input.type = "text";     btn.textContent = "Hide"; }
+  else                           { input.type = "password"; btn.textContent = "Show"; }
+}
+
+function showError(msg) {
+  document.getElementById("errorMsg").textContent = msg;
+  document.getElementById("errorAlert").classList.add("show");
+  document.getElementById("successAlert").classList.remove("show");
+}
+
+function showSuccess(msg) {
+  document.getElementById("successMsg").textContent = msg;
+  document.getElementById("successAlert").classList.add("show");
+  document.getElementById("errorAlert").classList.remove("show");
+}
+
+function setLoading(loading) {
+  document.getElementById("loginBtn").disabled  = loading;
+  document.getElementById("spinner").style.display = loading ? "block" : "none";
+  document.getElementById("btnText").textContent   = loading ? "Signing In..." : "Sign In";
+}
+
+async function doLogin() {
+  const email    = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+
+  if (!email || !password) { showError("Please fill in all fields."); return; }
+
+  setLoading(true);
+  try {
+    const res  = await fetch(`${BASE}/api/auth/login`, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({email, password})
+    });
+    const data = await res.json();
+
+    if (!res.ok) { showError(data.detail || "Login failed."); setLoading(false); return; }
+
+    localStorage.setItem("ps_token", data.token);
+    localStorage.setItem("ps_user",  JSON.stringify(data.user));
+
+    showSuccess(`Welcome back, ${data.user.name}.`);
+    setTimeout(() => redirectByRole(data.user.role), 800);
+
+  } catch(e) {
+    showError("Network error — please try again.");
+    setLoading(false);
+  }
+}
+
+document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
+</script>
+</body>
+</html>

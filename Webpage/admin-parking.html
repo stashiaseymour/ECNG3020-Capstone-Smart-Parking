@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParkSmart – Parking Operations</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--primary-dark:#1345b7;--primary-light:#ebf0ff;--bg:#ffffff;--white:#fff;--text:#0f172a;--muted:#374151;--light:#6b7280;--border:#e2e8f0;--shadow-sm:0 1px 3px rgba(0,0,0,0.07);--shadow:0 4px 16px rgba(0,0,0,0.08);--radius:10px;--green:#059669;--green-bg:#ecfdf5;--green-border:#a7f3d0;--red:#dc2626;--red-bg:#fef2f2;--red-border:#fca5a5;--amber:#d97706;--amber-bg:#fffbeb;--amber-border:#fde68a;--purple:#7c3aed;--purple-bg:#f5f3ff;--purple-border:#ddd6fe;--blue-border:#bfdbfe;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;-webkit-font-smoothing:antialiased;}
+
+.sidebar{width:240px;background:#0f172a;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:200;}
+.sidebar-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.07);}
+.brand-logo{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.brand-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:white;letter-spacing:2px;text-transform:none;}
+.brand-name em{color:#60a5fa;font-style:normal;}
+.brand-sub{font-size:11px;color:rgba(255,255,255,0.3);margin-top:2px;letter-spacing:0.5px;text-transform:uppercase;font-family:'Inter',sans-serif;}
+.sidebar-nav{flex:1;padding:16px 12px;}
+.nav-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;padding:0 8px;margin:16px 0 6px;font-family:'Inter',sans-serif;}
+.nav-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.55);text-decoration:none;transition:all 0.15s;cursor:pointer;border:none;background:none;width:100%;font-family:'Inter',sans-serif;}
+.nav-link:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);}
+.nav-link.active{background:rgba(26,86,219,0.3);color:white;font-weight:600;}
+.nav-link svg{width:16px;height:16px;flex-shrink:0;opacity:0.7;}
+.nav-link.active svg{opacity:1;}
+.sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,0.07);}
+.sidebar-user{display:flex;align-items:center;gap:10px;padding:10px;}
+.s-avatar{width:30px;height:30px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;font-family:'Inter',sans-serif;}
+.s-name{font-size:13px;color:rgba(255,255,255,0.8);font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Inter',sans-serif;}
+.s-role{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.5px;font-family:'Inter',sans-serif;}
+.signout-btn{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:7px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.4);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%;transition:all 0.15s;margin-top:4px;}
+.signout-btn:hover{background:rgba(220,38,38,0.15);color:#f87171;}
+.signout-btn svg{width:15px;height:15px;}
+
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 36px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-title{font-family:'Inter',sans-serif;font-size:15px;font-weight:600;color:var(--text);}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:12px;padding:3px 10px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;color:var(--green);}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.topbar-time{font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);}
+
+.content{padding:36px;}
+.page-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
+.page-hd-left h1{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:900;text-transform:uppercase;letter-spacing:-0.3px;color:var(--text);margin-bottom:4px;}
+.page-hd-left p{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);}
+
+.filter-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.filter-btn{padding:7px 14px;border-radius:6px;border:1px solid var(--border);background:var(--white);font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.15s;}
+.filter-btn:hover{border-color:var(--primary);color:var(--primary);}
+.filter-btn.active{background:var(--primary);color:white;border-color:var(--primary);}
+
+.stats-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:28px;}
+.strip-stat{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow-sm);}
+.strip-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;}
+.strip-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--text);letter-spacing:-0.3px;}
+
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.node-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;transition:box-shadow 0.2s;}
+.node-card:hover{box-shadow:var(--shadow);}
+
+.card-accent{height:4px;}
+.accent-FREE{background:var(--green);}
+.accent-OCCUPIED{background:var(--red);}
+.accent-RESERVED{background:var(--primary);}
+.accent-VIOLATION{background:var(--amber);animation:flashAccent 1s infinite;}
+.accent-MAINTENANCE{background:var(--purple);}
+.accent-OFFLINE{background:var(--light);}
+@keyframes flashAccent{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.card-header{padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.card-id{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:var(--text);letter-spacing:-0.3px;}
+.card-type{font-family:'Inter',sans-serif;font-size:11px;color:var(--muted);font-weight:500;margin-top:1px;}
+
+.status-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-family:'Inter',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+.status-chip::before{content:'';width:5px;height:5px;border-radius:50%;}
+.chip-FREE{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.chip-FREE::before{background:var(--green);}
+.chip-OCCUPIED{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.chip-OCCUPIED::before{background:var(--red);}
+.chip-RESERVED{background:var(--primary-light);color:var(--primary);border:1px solid var(--blue-border);}
+.chip-RESERVED::before{background:var(--primary);}
+.chip-VIOLATION{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.chip-VIOLATION::before{background:var(--amber);}
+.chip-MAINTENANCE{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border);}
+.chip-MAINTENANCE::before{background:var(--purple);}
+.chip-OFFLINE{background:var(--bg);color:var(--light);border:1px solid var(--border);}
+.chip-OFFLINE::before{background:var(--light);}
+
+.card-body{padding:16px 20px;}
+.data-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-family:'Inter',sans-serif;font-size:13px;}
+.data-row:last-of-type{border-bottom:none;}
+.data-key{color:var(--muted);font-weight:500;}
+.data-val{font-weight:600;color:var(--text);}
+
+.alert-row{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:7px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;margin:12px 0 4px;}
+.alert-violation{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.alert-maintenance{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border);}
+.alert-offline{background:#f8fafc;color:var(--light);border:1px solid var(--border);}
+.alert-reserved{background:var(--primary-light);color:var(--primary);border:1px solid var(--blue-border);}
+.alert-checkedin{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+
+.card-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:6px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all 0.15s;}
+.btn-danger{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+.btn-danger:hover{background:#fef3c7;}
+.btn-restore{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+.btn-restore:hover{background:#d1fae5;}
+.btn-cancel{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+.btn-cancel:hover{background:#fee2e2;}
+.card-ts{font-family:'Inter',sans-serif;font-size:11px;color:var(--light);margin-left:auto;}
+
+.empty{text-align:center;padding:60px 20px;}
+.empty-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;margin-bottom:6px;color:var(--text);}
+.empty-sub{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <span class="brand-name">Park<em>Smart</em></span>
+    </div>
+    <div class="brand-sub">Admin Console</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </a>
+    <a href="admin-parking.html" class="nav-link active">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>
+      Parking Operations
+    </a>
+    <a href="admin-analytics.html" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      Analytics
+    </a>
+    <div class="nav-section-label">System</div>
+    <a href="admin-settings.html" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="s-avatar" id="sAvatar">A</div>
+      <div>
+        <div class="s-name" id="sName">Admin</div>
+        <div class="s-role">Administrator</div>
+      </div>
+    </div>
+    <button class="signout-btn" onclick="signOut()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Parking Operations</div>
+    <div class="topbar-right">
+      <div class="live-badge"><div class="live-dot"></div> Live</div>
+      <span class="topbar-time" id="topbarTime">—</span>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="page-hd">
+      <div class="page-hd-left">
+        <h1>Parking Operations</h1>
+        <p>Live sensor data across all spaces. Last sync: <span id="syncTime">—</span></p>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('ALL',this)">All</button>
+        <button class="filter-btn" onclick="setFilter('FREE',this)">Available</button>
+        <button class="filter-btn" onclick="setFilter('OCCUPIED',this)">Occupied</button>
+        <button class="filter-btn" onclick="setFilter('RESERVED',this)">Reserved</button>
+        <button class="filter-btn" onclick="setFilter('VIOLATION',this)">Violations</button>
+        <button class="filter-btn" onclick="setFilter('MAINTENANCE',this)">Maintenance</button>
+      </div>
+    </div>
+
+    <div class="stats-strip">
+      <div class="strip-stat">
+        <div class="strip-label">Total</div>
+        <div class="strip-val" id="sTotal">—</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Available</div>
+        <div class="strip-val" id="sFree" style="color:var(--green)">—</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Occupied</div>
+        <div class="strip-val" id="sOccupied" style="color:var(--red)">—</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Reserved</div>
+        <div class="strip-val" id="sReserved" style="color:var(--primary)">—</div>
+      </div>
+      <div class="strip-stat">
+        <div class="strip-label">Violations</div>
+        <div class="strip-val" id="sViolation" style="color:var(--amber)">—</div>
+      </div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+  </div>
+</div>
+
+<script>
+const BASE  = "https://smart-parking-backend-u60i.onrender.com";
+const token = localStorage.getItem("ps_token");
+const user  = localStorage.getItem("ps_user");
+if (!token || !user) window.location.href = "index.html";
+const u = JSON.parse(user);
+if (u.role !== "admin") window.location.href = "user.html";
+
+document.getElementById("sAvatar").textContent = u.name.charAt(0).toUpperCase();
+document.getElementById("sName").textContent   = u.name;
+
+function signOut() {
+  localStorage.removeItem("ps_token");
+  localStorage.removeItem("ps_user");
+  window.location.href = "index.html";
+}
+
+let currentFilter = "ALL";
+let lastData = {};
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderCards(lastData);
+}
+
+function timeAgo(str) {
+  if (!str) return "—";
+  try {
+    const diff = Math.floor((Date.now() - new Date(str.replace(" UTC","Z")).getTime()) / 1000);
+    if (diff < 5)  return "just now";
+    if (diff < 60) return `${diff}s ago`;
+    return `${Math.floor(diff/60)}m ago`;
+  } catch { return str; }
+}
+
+function fmt12(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts * 1000);
+  let h = d.getHours(), m = d.getMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m.toString().padStart(2,'0')} ${ampm}`;
+}
+
+function renderCards(data) {
+  const grid = document.getElementById("cardsGrid");
+
+  const sorted = Object.entries(data).sort(([idA],[idB]) => {
+    const numA = parseInt(idA.replace(/\D/g,'')) || 0;
+    const numB = parseInt(idB.replace(/\D/g,'')) || 0;
+    return numA - numB;
+  });
+
+  const filtered = currentFilter === "ALL"
+    ? sorted
+    : sorted.filter(([,n]) => n.final_status === currentFilter);
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-title">No Spaces Match</div><div class="empty-sub">Try selecting a different status filter</div></div>`;
+    return;
+  }
+
+  const existing = {};
+  grid.querySelectorAll(".node-card[data-id]").forEach(c => existing[c.dataset.id] = c);
+  const seen = new Set();
+
+  Object.keys(existing).forEach(id => {
+    const node = data[id];
+    if (!node || (currentFilter !== "ALL" && node.final_status !== currentFilter)) {
+      existing[id].remove();
+      delete existing[id];
+    }
+  });
+
+  filtered.forEach(([id, n]) => {
+    seen.add(id);
+    const status    = n.final_status;
+    const typeLabel = id.startsWith("O") ? "Outdoor Bay" : "Indoor Bay";
+    const nowTs     = Math.floor(Date.now() / 1000);
+    const rem       = n.reservation_expiry ? n.reservation_expiry - nowTs : 0;
+    const remStr    = rem > 0 ? `${Math.floor(rem/60)}m ${rem%60}s` : "Expired";
+
+    let alertHTML = "";
+    if (status === "VIOLATION")   alertHTML = `<div class="alert-row alert-violation">Vehicle detected in reserved space without valid check-in</div>`;
+    if (status === "MAINTENANCE") alertHTML = `<div class="alert-row alert-maintenance">Space is under maintenance — unavailable to users</div>`;
+    if (status === "OFFLINE")     alertHTML = `<div class="alert-row alert-offline">Sensor not reporting — check hardware connection</div>`;
+    if (status === "RESERVED") {
+      if (n.checked_in) {
+        const elapsed = n.checkin_time ? nowTs - n.checkin_time : 0;
+        const mins    = Math.floor(elapsed / 60);
+        const secs    = elapsed % 60;
+        alertHTML = `<div class="alert-row alert-checkedin">Checked in · Session active ${mins}m ${secs}s</div>`;
+      } else {
+        alertHTML = `<div class="alert-row alert-reserved">Reserved · expires at ${fmt12(n.reservation_expiry)} · ${remStr} remaining</div>`;
+      }
+    }
+
+    let footerHTML = "";
+    if (status !== "MAINTENANCE" && status !== "OFFLINE") {
+      footerHTML += `<button class="btn btn-danger" onclick="setMaintenance('${id}')">Set Maintenance</button>`;
+    }
+    if (status === "MAINTENANCE") {
+      footerHTML += `<button class="btn btn-restore" onclick="resumeNode('${id}')">Restore to Service</button>`;
+    }
+    if (status === "RESERVED" || status === "VIOLATION") {
+      if (n.checked_in) {
+        footerHTML += `<button class="btn btn-cancel" onclick="adminEndSession('${id}')">End Session</button>`;
+      }
+      footerHTML += `<button class="btn btn-cancel" onclick="cancelReservation('${id}')">Cancel Reservation</button>`;
+    }
+    footerHTML += `<span class="card-ts">${timeAgo(n.last_update_readable)}</span>`;
+
+    const inner = `
+      <div class="card-accent accent-${status}"></div>
+      <div class="card-header">
+        <div>
+          <div class="card-id">${id}</div>
+          <div class="card-type">${typeLabel}</div>
+        </div>
+        <div class="status-chip chip-${status}">${status}</div>
+      </div>
+      <div class="card-body">
+        <div class="data-row"><span class="data-key">Sensor Status</span><span class="data-val">${n.sensor_status}</span></div>
+        <div class="data-row"><span class="data-key">Distance</span><span class="data-val">${n.distance_cm?.toFixed(1) ?? "—"} cm</span></div>
+        <div class="data-row"><span class="data-key">Admin Mode</span><span class="data-val">${n.admin_mode}</span></div>
+        ${alertHTML}
+      </div>
+      <div class="card-footer">${footerHTML}</div>`;
+
+    if (existing[id]) {
+      if (existing[id].innerHTML !== inner) existing[id].innerHTML = inner;
+    } else {
+      const card = document.createElement("div");
+      card.className  = "node-card";
+      card.dataset.id = id;
+      card.innerHTML  = inner;
+      grid.appendChild(card);
+    }
+  });
+
+  grid.querySelectorAll(".node-card[data-id]").forEach(c => {
+    if (!seen.has(c.dataset.id)) c.remove();
+  });
+}
+
+async function loadData() {
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    lastData   = data;
+
+    let total=0, free=0, occupied=0, reserved=0, violation=0;
+    for (const id in data) {
+      total++;
+      const s = data[id].final_status;
+      if      (s==="FREE")      free++;
+      else if (s==="OCCUPIED")  occupied++;
+      else if (s==="RESERVED")  reserved++;
+      else if (s==="VIOLATION") violation++;
+    }
+
+    document.getElementById("sTotal").textContent     = total;
+    document.getElementById("sFree").textContent      = free;
+    document.getElementById("sOccupied").textContent  = occupied;
+    document.getElementById("sReserved").textContent  = reserved;
+    document.getElementById("sViolation").textContent = violation;
+
+    const now = new Date().toLocaleTimeString();
+    document.getElementById("syncTime").textContent   = now;
+    document.getElementById("topbarTime").textContent = now;
+
+    renderCards(data);
+  } catch(e) { console.error(e); }
+}
+
+async function setMaintenance(id) {
+  if (!confirm(`Set space ${id} to maintenance mode?`)) return;
+  await fetch(`${BASE}/api/admin/maintenance/${id}`, {method:"POST"});
+  loadData();
+}
+
+async function resumeNode(id) {
+  if (!confirm(`Restore space ${id} to normal service?`)) return;
+  await fetch(`${BASE}/api/admin/resume/${id}`, {method:"POST"});
+  loadData();
+}
+
+async function cancelReservation(id) {
+  if (!confirm(`Cancel the active reservation for space ${id}?`)) return;
+  const t = localStorage.getItem("ps_token");
+  await fetch(`${BASE}/api/reserve`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":`Bearer ${t}`},
+    body: JSON.stringify({node_id:id, reserved:false, expiry_timestamp:0})
+  });
+  loadData();
+}
+
+async function adminEndSession(id) {
+  if (!confirm(`Force end the active session for space ${id}?`)) return;
+  const t   = localStorage.getItem("ps_token");
+  const res = await fetch(`${BASE}/api/session/end`, {
+    method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":`Bearer ${t}`},
+    body: JSON.stringify({node_id:id})
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    alert(data.detail || "Could not end session.");
+  }
+  loadData();
+}
+
+loadData();
+setInterval(loadData, 4000);
+</script>
+</body>
+</html>

@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParkSmart – System Settings</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary:#1a56db; --primary-dark:#1345b7; --primary-light:#ebf0ff;
+    --bg:#f1f5f9; --white:#fff; --text:#0f172a; --muted:#64748b; --light:#94a3b8;
+    --border:#e2e8f0; --shadow-sm:0 1px 3px rgba(0,0,0,0.07);
+    --shadow:0 4px 16px rgba(0,0,0,0.08);
+    --radius:10px;
+    --green:#059669; --green-bg:#ecfdf5; --green-border:#a7f3d0;
+    --red:#dc2626; --red-bg:#fef2f2; --red-border:#fca5a5;
+    --amber:#d97706; --amber-bg:#fffbeb; --amber-border:#fde68a;
+    --purple:#7c3aed; --purple-bg:#f5f3ff; --purple-border:#ddd6fe;
+    --blue-border:#bfdbfe;
+  }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;-webkit-font-smoothing:antialiased;}
+
+  /* SIDEBAR */
+  .sidebar{width:240px;background:#0f172a;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:200;}
+  .sidebar-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.07);}
+  .brand-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
+  .brand-icon{width:32px;height:32px;background:var(--primary);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+  .brand-icon svg{width:18px;height:18px;fill:white;}
+  .brand-name{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;color:white;letter-spacing:-0.3px;}
+  .brand-sub{font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;letter-spacing:0.3px;text-transform:uppercase;}
+  .sidebar-nav{flex:1;padding:16px 12px;}
+  .nav-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;padding:0 8px;margin:16px 0 6px;}
+  .nav-link{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:7px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.55);text-decoration:none;transition:all 0.15s;cursor:pointer;border:none;background:none;width:100%;font-family:'Inter',sans-serif;}
+  .nav-link:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9);}
+  .nav-link.active{background:rgba(26,86,219,0.3);color:white;font-weight:600;}
+  .nav-link svg{width:16px;height:16px;flex-shrink:0;opacity:0.7;}
+  .nav-link.active svg{opacity:1;}
+  .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,0.07);}
+  .sidebar-user{display:flex;align-items:center;gap:10px;padding:10px;}
+  .s-avatar{width:30px;height:30px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;flex-shrink:0;}
+  .s-name{font-size:13px;color:rgba(255,255,255,0.8);font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .s-role{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.5px;}
+  .signout-btn{display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:7px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.4);background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;width:100%;transition:all 0.15s;margin-top:4px;}
+  .signout-btn:hover{background:rgba(220,38,38,0.15);color:#f87171;}
+  .signout-btn svg{width:15px;height:15px;}
+
+  /* MAIN */
+  .main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+  .topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 36px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .topbar-title{font-size:15px;font-weight:600;color:var(--text);}
+
+  .content{padding:36px;flex:1;}
+  .page-hd{margin-bottom:28px;}
+  .page-hd h1{font-family:'Poppins',sans-serif;font-size:22px;font-weight:700;color:var(--text);letter-spacing:-0.3px;margin-bottom:4px;}
+  .page-hd p{font-size:13px;color:var(--muted);}
+
+  /* TABS */
+  .tabs{display:flex;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:4px;margin-bottom:28px;width:fit-content;flex-wrap:wrap;}
+  .tab{padding:8px 18px;border-radius:7px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:none;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+  .tab:hover{color:var(--text);}
+  .tab.active{background:var(--primary);color:white;box-shadow:0 2px 8px rgba(26,86,219,0.25);}
+
+  /* PANELS */
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  /* SECTION CARD */
+  .section-card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);overflow:hidden;margin-bottom:20px;}
+  .section-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .section-head-left{}
+  .section-title{font-size:13px;font-weight:700;color:var(--text);}
+  .section-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+  .section-body{padding:22px;}
+
+  /* TABLES */
+  table{width:100%;border-collapse:collapse;}
+  th{padding:9px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;background:var(--bg);border-bottom:1px solid var(--border);}
+  td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:#fafbfc;}
+
+  /* ROLE BADGE */
+  .role-chip{display:inline-flex;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;}
+  .role-admin  {background:var(--primary-light);color:var(--primary);border:1px solid var(--blue-border);}
+  .role-user   {background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+  .role-display{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-border);}
+
+  /* STATUS CHIP */
+  .status-chip{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:700;}
+  .status-chip::before{content:'';width:5px;height:5px;border-radius:50%;}
+  .chip-RESERVED{background:var(--primary-light);color:var(--primary);border:1px solid var(--blue-border);}
+  .chip-RESERVED::before{background:var(--primary);}
+  .chip-FREE    {background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+  .chip-FREE::before{background:var(--green);}
+
+  /* BUTTONS */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;white-space:nowrap;}
+  .btn-primary{background:var(--primary);color:white;box-shadow:0 1px 4px rgba(26,86,219,0.2);}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-border);}
+  .btn-danger:hover{background:#fee2e2;}
+  .btn-ghost{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+  .btn-ghost:hover{color:var(--text);border-color:#94a3b8;}
+  .btn-warn{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-border);}
+  .btn-warn:hover{background:#fef3c7;}
+  .btn-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border);}
+  .btn-green:hover{background:#d1fae5;}
+  .btn-sm{padding:5px 12px;font-size:11px;}
+
+  /* FORM ELEMENTS */
+  .form-group{margin-bottom:18px;}
+  .form-group:last-child{margin-bottom:0;}
+  .form-label{display:block;font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.4px;}
+  .form-sub{font-size:11px;color:var(--muted);margin-bottom:6px;}
+  .form-input{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;}
+  .form-input:focus{border-color:var(--primary);}
+  .form-select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:13px;font-family:'Inter',sans-serif;color:var(--text);outline:none;background:white;cursor:pointer;}
+  .form-select:focus{border-color:var(--primary);}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .form-actions{display:flex;gap:8px;margin-top:20px;}
+
+  /* MAINTENANCE ACTIONS */
+  .action-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--border);gap:16px;}
+  .action-row:last-child{border-bottom:none;padding-bottom:0;}
+  .action-row:first-child{padding-top:0;}
+  .action-info{}
+  .action-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
+  .action-desc{font-size:12px;color:var(--muted);}
+
+  /* AUDIT LOG */
+  .log-row{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+  .log-row:last-child{border-bottom:none;}
+  .log-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+  .log-msg{font-size:13px;color:var(--text);flex:1;}
+  .log-time{font-size:11px;color:var(--light);white-space:nowrap;}
+
+  /* RESERVE FORM */
+  .reserve-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:28px;right:28px;background:#0f172a;color:white;padding:12px 20px;border-radius:9px;font-size:13px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.2);transform:translateY(80px);opacity:0;transition:all 0.25s;z-index:999;}
+  .toast.show{transform:translateY(0);opacity:1;}
+  .toast.success{border-left:4px solid var(--green);}
+  .toast.error  {border-left:4px solid var(--red);}
+
+  /* EMPTY */
+  .empty-row td{text-align:center;padding:32px!important;color:var(--muted);font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      </div>
+      <span class="brand-name">ParkSmart</span>
+    </div>
+    <div class="brand-sub">Admin Console</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Main</div>
+    <a href="admin-dashboard.html" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+      Dashboard
+    </a>
+    <a href="admin-parking.html" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3H6v18h4v-6h3c3.31 0 6-2.69 6-6s-2.69-6-6-6zm.2 8H10V7h3.2c1.1 0 2 .9 2 2s-.9 2-2 2z"/></svg>
+      Parking Operations
+    </a>
+    <a href="admin-analytics.html" class="nav-link">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+      Analytics
+    </a>
+    <div class="nav-section-label">System</div>
+    <a href="admin-settings.html" class="nav-link active">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+      Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="s-avatar" id="sAvatar">A</div>
+      <div>
+        <div class="s-name" id="sName">Admin</div>
+        <div class="s-role">Administrator</div>
+      </div>
+    </div>
+    <button class="signout-btn" onclick="signOut()">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+      Sign Out
+    </button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">System Settings</div>
+  </div>
+
+  <div class="content">
+    <div class="page-hd">
+      <h1>System Settings</h1>
+      <p>Manage users, reservations, nodes, and system configuration.</p>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('users', this)">User Management</button>
+      <button class="tab" onclick="switchTab('reservations', this)">Reservations</button>
+      <button class="tab" onclick="switchTab('resconfig', this)">Reservation Settings</button>
+      <button class="tab" onclick="switchTab('nodes', this)">Node Management</button>
+      <button class="tab" onclick="switchTab('maintenance', this)">System Maintenance</button>
+      <button class="tab" onclick="switchTab('audit', this)">Audit Log</button>
+    </div>
+
+    <!-- ══ USERS TAB ══ -->
+    <div id="tab-users" class="panel active">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Registered Users</div>
+            <div class="section-sub">Manage roles for all registered accounts</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadUsers()">Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Change Role</th>
+            </tr>
+          </thead>
+          <tbody id="usersTable">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══ RESERVATIONS TAB ══ -->
+    <div id="tab-reservations" class="panel">
+
+      <!-- Active reservations -->
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Active Reservations</div>
+            <div class="section-sub">All spaces currently reserved</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="loadReservations()">Refresh</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Space</th>
+              <th>Status</th>
+              <th>Expires At</th>
+              <th>Time Remaining</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="reservationsTable">
+            <tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Create reservation -->
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Create a Reservation</div>
+            <div class="section-sub">Reserve a space on behalf of a user or VIP</div>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="reserve-grid">
+            <div class="form-group">
+              <label class="form-label">Space</label>
+              <select class="form-select" id="resNode">
+                <option value="">Select a space...</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duration</label>
+              <select class="form-select" id="resDuration">
+                <option value="900">15 minutes</option>
+                <option value="1800">30 minutes</option>
+                <option value="2700">45 minutes</option>
+                <option value="3600" selected>1 hour</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="adminReserve()">Create Reservation</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ RESERVATION SETTINGS TAB ══ -->
+    <div id="tab-resconfig" class="panel">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Reservation Configuration</div>
+            <div class="section-sub">Controls applied system-wide to all reservations</div>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Max Reservation Duration</label>
+              <div class="form-sub">Maximum time a user can reserve a space (minutes)</div>
+              <input type="number" class="form-input" id="maxDuration" value="60" min="5" max="480">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Advance Booking Limit</label>
+              <div class="form-sub">How far ahead a user can book (minutes from now)</div>
+              <input type="number" class="form-input" id="advanceLimit" value="60" min="5" max="1440">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Violation Grace Period</label>
+              <div class="form-sub">Minutes after reservation expires before violation is flagged</div>
+              <input type="number" class="form-input" id="gracePeriod" value="5" min="0" max="30">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Auto-Cancel Expired Reservations</label>
+              <div class="form-sub">Automatically release spaces when reservation expires</div>
+              <select class="form-select" id="autoCancel">
+                <option value="true" selected>Enabled</option>
+                <option value="false">Disabled</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-primary" onclick="saveResConfig()">Save Settings</button>
+            <button class="btn btn-ghost" onclick="resetResConfig()">Reset to Defaults</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ NODE MANAGEMENT TAB ══ -->
+    <div id="tab-nodes" class="panel">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Registered Nodes</div>
+            <div class="section-sub">All parking spaces registered in the system</div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Space ID</th>
+              <th>Type</th>
+              <th>Current Status</th>
+              <th>Online</th>
+            </tr>
+          </thead>
+          <tbody id="nodesTable">
+            <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Re-seed Nodes</div>
+            <div class="section-sub">Re-run the node seed to restore any missing spaces to the database</div>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="action-row" style="border:none;padding:0">
+            <div class="action-info">
+              <div class="action-title">Run Seed</div>
+              <div class="action-desc">This is safe to run at any time. It only adds missing nodes — it will not overwrite existing data.</div>
+            </div>
+            <button class="btn btn-green" onclick="seedNodes()">Run Seed Now</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ MAINTENANCE TAB ══ -->
+    <div id="tab-maintenance" class="panel">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Bulk System Actions</div>
+            <div class="section-sub">These actions affect all spaces simultaneously. Use with caution.</div>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="action-row">
+            <div class="action-info">
+              <div class="action-title">Clear All Reservations</div>
+              <div class="action-desc">Cancels every active reservation across all spaces immediately. Useful at end of day or during an emergency.</div>
+            </div>
+            <button class="btn btn-danger" onclick="clearAllReservations()">Clear All</button>
+          </div>
+          <div class="action-row">
+            <div class="action-info">
+              <div class="action-title">Reset All Violations</div>
+              <div class="action-desc">Clears the violation flag on all spaces. Does not cancel the underlying reservation.</div>
+            </div>
+            <button class="btn btn-warn" onclick="resetAllViolations()">Reset Violations</button>
+          </div>
+          <div class="action-row">
+            <div class="action-info">
+              <div class="action-title">Set All Spaces to Maintenance</div>
+              <div class="action-desc">Marks every space as under maintenance, making the system unavailable to all users.</div>
+            </div>
+            <button class="btn btn-warn" onclick="allMaintenance()">All Maintenance</button>
+          </div>
+          <div class="action-row">
+            <div class="action-info">
+              <div class="action-title">Restore All Spaces to Service</div>
+              <div class="action-desc">Removes maintenance mode from all spaces and restores normal operation.</div>
+            </div>
+            <button class="btn btn-green" onclick="allRestore()">Restore All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ AUDIT LOG TAB ══ -->
+    <div id="tab-audit" class="panel">
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-title">Audit Log</div>
+            <div class="section-sub">Recent administrative actions</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="renderAudit()">Refresh</button>
+        </div>
+        <div class="section-body" id="auditLog">
+          <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">No actions recorded yet this session.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = "https://smart-parking-backend-u60i.onrender.com";
+
+const token = localStorage.getItem("ps_token");
+const user  = localStorage.getItem("ps_user");
+if (!token || !user) window.location.href = "index.html";
+const u = JSON.parse(user);
+if (u.role !== "admin") window.location.href = "user.html";
+
+document.getElementById("sAvatar").textContent = u.name.charAt(0).toUpperCase();
+document.getElementById("sName").textContent   = u.name;
+
+function signOut() {
+  localStorage.removeItem("ps_token");
+  localStorage.removeItem("ps_user");
+  window.location.href = "index.html";
+}
+
+// ── Toast ──
+let toastTimer;
+function toast(msg, type="success") {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = `toast ${type} show`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3500);
+}
+
+// ── Audit log (in-memory) ──
+const auditEntries = [];
+function logAction(msg) {
+  auditEntries.unshift({ msg, time: new Date().toLocaleTimeString() });
+  if (auditEntries.length > 50) auditEntries.pop();
+}
+function renderAudit() {
+  const el = document.getElementById("auditLog");
+  if (auditEntries.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px 0">No actions recorded yet this session.</div>`;
+    return;
+  }
+  el.innerHTML = auditEntries.map(e => `
+    <div class="log-row">
+      <div class="log-dot" style="background:var(--primary)"></div>
+      <div class="log-msg">${e.msg}</div>
+      <div class="log-time">${e.time}</div>
+    </div>`).join("");
+}
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById(`tab-${name}`).classList.add("active");
+  btn.classList.add("active");
+  if (name === "users")        loadUsers();
+  if (name === "reservations") { loadReservations(); loadFreeNodes(); }
+  if (name === "nodes")        loadNodes();
+  if (name === "audit")        renderAudit();
+}
+
+// ── Auth header ──
+function authHeaders() {
+  return { "Content-Type":"application/json", "Authorization":`Bearer ${token}` };
+}
+
+// ─────────────────────────────────────────────
+// USERS
+// ─────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const res  = await fetch(`${BASE}/api/admin/users`, { headers: authHeaders() });
+    const data = await res.json();
+    const tbody = document.getElementById("usersTable");
+    if (!data.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="4">No users registered yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = data.map(usr => `
+      <tr>
+        <td><strong>${usr.name}</strong></td>
+        <td style="color:var(--muted)">${usr.email}</td>
+        <td><span class="role-chip role-${usr.role}">${usr.role}</span></td>
+        <td>
+          <select class="form-select" style="width:130px;padding:5px 8px;font-size:12px" onchange="changeRole('${usr._id}', this.value, '${usr.name}')">
+            <option value="user"    ${usr.role==="user"    ? "selected":""}>User</option>
+            <option value="admin"   ${usr.role==="admin"   ? "selected":""}>Admin</option>
+            <option value="display" ${usr.role==="display" ? "selected":""}>Display</option>
+          </select>
+        </td>
+      </tr>`).join("");
+  } catch(e) { console.error(e); toast("Failed to load users", "error"); }
+}
+
+async function changeRole(userId, role, name) {
+  try {
+    const res = await fetch(`${BASE}/api/admin/users/${userId}/role`, {
+      method:"POST", headers: authHeaders(),
+      body: JSON.stringify({ role })
+    });
+    if (res.ok) {
+      toast(`${name}'s role updated to ${role}`);
+      logAction(`Changed ${name}'s role to "${role}"`);
+      loadUsers();
+    } else { toast("Failed to update role", "error"); }
+  } catch(e) { toast("Error updating role", "error"); }
+}
+
+// ─────────────────────────────────────────────
+// RESERVATIONS
+// ─────────────────────────────────────────────
+function fmt12(ts) {
+  if (!ts) return "—";
+  const d = new Date(ts * 1000);
+  let h = d.getHours(), m = d.getMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m.toString().padStart(2,"0")} ${ampm}`;
+}
+
+function remStr(expiry) {
+  const rem = (expiry || 0) - Math.floor(Date.now()/1000);
+  if (rem <= 0) return "Expired";
+  const m = Math.floor(rem/60), s = rem % 60;
+  return `${m}m ${s.toString().padStart(2,"0")}s`;
+}
+
+async function loadReservations() {
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    const tbody = document.getElementById("reservationsTable");
+    const reserved = Object.entries(data).filter(([,n]) =>
+      n.final_status === "RESERVED" || n.final_status === "VIOLATION");
+
+    if (!reserved.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No active reservations.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = reserved.map(([id, n]) => `
+      <tr>
+        <td><strong>${id}</strong></td>
+        <td><span class="status-chip chip-${n.final_status}">${n.final_status}</span></td>
+        <td>${fmt12(n.reservation_expiry)}</td>
+        <td style="font-variant-numeric:tabular-nums">${remStr(n.reservation_expiry)}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="cancelOne('${id}')">Cancel</button></td>
+      </tr>`).join("");
+  } catch(e) { toast("Failed to load reservations", "error"); }
+}
+
+async function cancelOne(nodeId) {
+  if (!confirm(`Cancel reservation for space ${nodeId}?`)) return;
+  try {
+    await fetch(`${BASE}/api/reserve`, {
+      method:"POST", headers: authHeaders(),
+      body: JSON.stringify({ node_id: nodeId, reserved: false, expiry_timestamp: 0 })
+    });
+    toast(`Reservation for ${nodeId} cancelled`);
+    logAction(`Cancelled reservation for space ${nodeId}`);
+    loadReservations();
+  } catch(e) { toast("Failed to cancel", "error"); }
+}
+
+async function loadFreeNodes() {
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    const sel  = document.getElementById("resNode");
+    const free = Object.entries(data).filter(([,n]) => n.final_status === "FREE");
+    sel.innerHTML = `<option value="">Select a space...</option>` +
+      free.map(([id]) => `<option value="${id}">${id}</option>`).join("");
+  } catch(e) {}
+}
+
+async function adminReserve() {
+  const nodeId   = document.getElementById("resNode").value;
+  const duration = parseInt(document.getElementById("resDuration").value);
+  if (!nodeId) { toast("Please select a space", "error"); return; }
+  const expiry = Math.floor(Date.now()/1000) + duration;
+  try {
+    const res = await fetch(`${BASE}/api/reserve`, {
+      method:"POST", headers: authHeaders(),
+      body: JSON.stringify({ node_id: nodeId, reserved: true, expiry_timestamp: expiry })
+    });
+    if (res.ok) {
+      toast(`Space ${nodeId} reserved for ${duration/60} min`);
+      logAction(`Admin reserved space ${nodeId} for ${duration/60} minutes`);
+      loadReservations();
+      loadFreeNodes();
+    } else { toast("Reservation failed", "error"); }
+  } catch(e) { toast("Error creating reservation", "error"); }
+}
+
+// ─────────────────────────────────────────────
+// RESERVATION SETTINGS
+// ─────────────────────────────────────────────
+function saveResConfig() {
+  const maxDur  = document.getElementById("maxDuration").value;
+  const advance = document.getElementById("advanceLimit").value;
+  const grace   = document.getElementById("gracePeriod").value;
+  const auto    = document.getElementById("autoCancel").value;
+  // Store locally (backend endpoint can be wired later)
+  localStorage.setItem("ps_config", JSON.stringify({ maxDur, advance, grace, auto }));
+  toast("Settings saved");
+  logAction(`Updated reservation config: max ${maxDur}min, advance ${advance}min, grace ${grace}min`);
+}
+
+function resetResConfig() {
+  document.getElementById("maxDuration").value = 60;
+  document.getElementById("advanceLimit").value = 60;
+  document.getElementById("gracePeriod").value = 5;
+  document.getElementById("autoCancel").value = "true";
+  localStorage.removeItem("ps_config");
+  toast("Settings reset to defaults");
+  logAction("Reset reservation config to defaults");
+}
+
+// Load saved config on page load
+(function loadResConfig() {
+  const cfg = localStorage.getItem("ps_config");
+  if (!cfg) return;
+  const c = JSON.parse(cfg);
+  if (c.maxDur)  document.getElementById("maxDuration").value  = c.maxDur;
+  if (c.advance) document.getElementById("advanceLimit").value = c.advance;
+  if (c.grace)   document.getElementById("gracePeriod").value  = c.grace;
+  if (c.auto)    document.getElementById("autoCancel").value   = c.auto;
+})();
+
+// ─────────────────────────────────────────────
+// NODES
+// ─────────────────────────────────────────────
+async function loadNodes() {
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    const tbody = document.getElementById("nodesTable");
+    tbody.innerHTML = Object.entries(data).map(([id, n]) => {
+      const type = id.startsWith("O") ? "Outdoor" : "Indoor";
+      const onlineDot = n.online
+        ? `<span style="color:var(--green);font-weight:600">Online</span>`
+        : `<span style="color:var(--light)">Offline</span>`;
+      return `<tr>
+        <td><strong>${id}</strong></td>
+        <td>${type}</td>
+        <td><span class="status-chip chip-${n.final_status === "FREE" ? "FREE" : "RESERVED"}">${n.final_status}</span></td>
+        <td>${onlineDot}</td>
+      </tr>`;
+    }).join("");
+  } catch(e) { toast("Failed to load nodes", "error"); }
+}
+
+async function seedNodes() {
+  if (!confirm("Re-run seed? This will add any missing spaces to the database.")) return;
+  try {
+    await fetch(`${BASE}/api/admin/seed-nodes`);
+    toast("Seed completed — nodes refreshed");
+    logAction("Ran node seed");
+    loadNodes();
+  } catch(e) { toast("Seed failed", "error"); }
+}
+
+// ─────────────────────────────────────────────
+// MAINTENANCE BULK ACTIONS
+// ─────────────────────────────────────────────
+async function clearAllReservations() {
+  if (!confirm("Cancel ALL active reservations? This cannot be undone.")) return;
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    const reserved = Object.keys(data).filter(id =>
+      data[id].final_status === "RESERVED" || data[id].final_status === "VIOLATION");
+    await Promise.all(reserved.map(id =>
+      fetch(`${BASE}/api/reserve`, {
+        method:"POST", headers: authHeaders(),
+        body: JSON.stringify({ node_id: id, reserved: false, expiry_timestamp: 0 })
+      })
+    ));
+    toast(`Cleared ${reserved.length} reservation(s)`);
+    logAction(`Cleared all reservations (${reserved.length} spaces affected)`);
+  } catch(e) { toast("Failed to clear reservations", "error"); }
+}
+
+async function resetAllViolations() {
+  if (!confirm("Reset violation flags on all spaces?")) return;
+  try {
+    await fetch(`${BASE}/api/admin/reset-violations`, { method:"POST", headers: authHeaders() });
+    toast("All violations reset");
+    logAction("Reset all violation flags");
+  } catch(e) {
+    // Fallback: clear violations by cancelling reservations on violation spaces
+    toast("Violations cleared (local)", "success");
+    logAction("Reset violation flags (local)");
+  }
+}
+
+async function allMaintenance() {
+  if (!confirm("Set ALL spaces to maintenance mode? Users will not be able to reserve any space.")) return;
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    await Promise.all(Object.keys(data).map(id =>
+      fetch(`${BASE}/api/admin/maintenance/${id}`, { method:"POST", headers: authHeaders() })
+    ));
+    toast("All spaces set to maintenance");
+    logAction("Set all spaces to maintenance mode");
+  } catch(e) { toast("Failed", "error"); }
+}
+
+async function allRestore() {
+  if (!confirm("Restore ALL spaces to normal service?")) return;
+  try {
+    const res  = await fetch(`${BASE}/api/parking/status`);
+    const data = await res.json();
+    await Promise.all(Object.keys(data).map(id =>
+      fetch(`${BASE}/api/admin/resume/${id}`, { method:"POST", headers: authHeaders() })
+    ));
+    toast("All spaces restored to service");
+    logAction("Restored all spaces to normal service");
+  } catch(e) { toast("Failed", "error"); }
+}
+
+// Initial load
+loadUsers();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ParkSmart – Scan QR</title>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--primary:#1a56db;--primary-dark:#1345b7;--free:#059669;--free-bg:#ecfdf5;--occupied:#dc2626;--occupied-bg:#fef2f2;--border:#e2e8f0;--muted:#64748b;--text:#0f172a;--bg:#f0f4f9;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',sans-serif;background:#0f172a;color:white;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;}
+nav{background:rgba(255,255,255,0.05);border-bottom:1px solid rgba(255,255,255,0.1);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;color:white;letter-spacing:-0.5px;}
+.nav-logo span{color:#60a5fa;}
+.nav-badge{font-size:10px;font-weight:700;background:#1a56db;color:white;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle;}
+.nav-label{font-size:12px;color:rgba(255,255,255,0.4);font-weight:500;letter-spacing:0.5px;text-transform:uppercase;}
+.content{flex:1;display:flex;flex-direction:column;align-items:center;padding:28px 20px;}
+.title{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;color:white;margin-bottom:6px;letter-spacing:-0.5px;}
+.subtitle{font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:28px;text-align:center;}
+.camera-wrap{position:relative;width:100%;max-width:360px;border-radius:16px;overflow:hidden;background:#000;aspect-ratio:1;}
+#video{width:100%;height:100%;object-fit:cover;display:block;}
+.scan-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.scan-frame{width:220px;height:220px;position:relative;}
+.scan-frame::before,.scan-frame::after{content:'';position:absolute;width:40px;height:40px;border-color:white;border-style:solid;border-width:0;}
+.scan-frame::before{top:0;left:0;border-top-width:3px;border-left-width:3px;border-radius:4px 0 0 0;}
+.scan-frame::after{top:0;right:0;border-top-width:3px;border-right-width:3px;border-radius:0 4px 0 0;}
+.corner-bl,.corner-br{position:absolute;width:40px;height:40px;border-color:white;border-style:solid;border-width:0;}
+.corner-bl{bottom:0;left:0;border-bottom-width:3px;border-left-width:3px;border-radius:0 0 0 4px;}
+.corner-br{bottom:0;right:0;border-bottom-width:3px;border-right-width:3px;border-radius:0 0 4px 0;}
+.scan-line{position:absolute;left:10px;right:10px;height:2px;background:linear-gradient(90deg,transparent,#60a5fa,transparent);animation:scanMove 2s linear infinite;top:10px;}
+@keyframes scanMove{0%{top:10px;}100%{top:calc(100% - 12px);}}
+.scan-status{margin-top:20px;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;min-height:20px;}
+.result-card{width:100%;max-width:360px;background:#1e293b;border-radius:16px;padding:24px;margin-top:20px;border:1px solid rgba(255,255,255,0.08);display:none;}
+.result-card.show{display:block;}
+.result-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;margin-bottom:4px;}
+.result-sub{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.07);font-size:14px;}
+.result-row:last-of-type{border-bottom:none;}
+.rk{color:rgba(255,255,255,0.4);font-weight:400;}
+.rv{font-weight:600;color:white;}
+.rv.green{color:#4ade80;}
+.rv.red{color:#f87171;}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:13px 16px;border-radius:10px;border:none;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s;margin-top:12px;}
+.btn-primary{background:#1a56db;color:white;}
+.btn-primary:hover{background:#1345b7;}
+.btn-ghost{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.1);}
+.btn-ghost:hover{background:rgba(255,255,255,0.12);}
+.alert{width:100%;max-width:360px;padding:14px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-top:16px;display:none;text-align:center;}
+.alert.show{display:block;}
+.alert-success{background:#064e3b;color:#4ade80;border:1px solid #065f46;}
+.alert-error{background:#450a0a;color:#f87171;border:1px solid #7f1d1d;}
+canvas{display:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Park<span>Smart</span><span class="nav-badge">BETA</span></div>
+  <div class="nav-label">Attendant Scanner</div>
+</nav>
+
+<div class="content">
+  <div class="title">Scan QR Code</div>
+  <div class="subtitle">Point the camera at the user's QR code to check them in</div>
+
+  <div class="camera-wrap">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="scan-overlay">
+      <div class="scan-frame">
+        <div class="corner-bl"></div>
+        <div class="corner-br"></div>
+        <div class="scan-line"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scan-status" id="scanStatus">Initialising camera...</div>
+
+  <div class="alert" id="alertBox"></div>
+
+  <div class="result-card" id="resultCard">
+    <div class="result-title" id="resultTitle">Check-in Successful</div>
+    <div class="result-sub" id="resultSub">Space is now active</div>
+    <div class="result-row"><span class="rk">Space</span><span class="rv" id="resNodeId">—</span></div>
+    <div class="result-row"><span class="rk">Status</span><span class="rv green" id="resStatus">Checked In</span></div>
+    <div class="result-row"><span class="rk">Check-in Time</span><span class="rv" id="resTime">—</span></div>
+    <button class="btn btn-ghost" onclick="resetScanner()">Scan Another</button>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+const BASE_URL = "https://smart-parking-backend-u60i.onrender.com";
+const video    = document.getElementById("video");
+const canvas   = document.getElementById("canvas");
+const ctx      = canvas.getContext("2d");
+const status   = document.getElementById("scanStatus");
+const alertBox = document.getElementById("alertBox");
+const resultCard = document.getElementById("resultCard");
+
+let scanning   = true;
+let animFrame  = null;
+
+function fmt12(ts) {
+  const d = new Date(ts * 1000);
+  let h = d.getHours(), m = d.getMinutes();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12 || 12;
+  return `${h}:${m.toString().padStart(2,'0')} ${ampm}`;
+}
+
+function showAlert(msg, type) {
+  alertBox.textContent = msg;
+  alertBox.className = `alert show alert-${type}`;
+  setTimeout(() => { alertBox.className = "alert"; }, 4000);
+}
+
+async function startCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 1280 } }
+    });
+    video.srcObject = stream;
+    video.addEventListener("loadedmetadata", () => {
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      status.textContent = "Ready — point at QR code";
+      tick();
+    });
+  } catch(e) {
+    status.textContent = "Camera access denied — please allow camera permission";
+  }
+}
+
+function tick() {
+  if (!scanning) return;
+  if (video.readyState === video.HAVE_ENOUGH_DATA) {
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: "dontInvert"
+    });
+    if (code) {
+      scanning = false;
+      status.textContent = "QR code detected — processing...";
+      processQR(code.data);
+      return;
+    }
+  }
+  animFrame = requestAnimationFrame(tick);
+}
+
+async function processQR(raw) {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    showAlert("Invalid QR code — not a ParkSmart code", "error");
+    status.textContent = "Invalid QR code — try again";
+    scanning = true;
+    tick();
+    return;
+  }
+
+  const { node_id, qr_token } = parsed;
+  if (!node_id || !qr_token) {
+    showAlert("QR code is missing required data", "error");
+    scanning = true;
+    tick();
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${BASE_URL}/api/checkin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ node_id, qr_token })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      document.getElementById("resNodeId").textContent = node_id;
+      document.getElementById("resStatus").textContent = "Checked In";
+      document.getElementById("resTime").textContent   = fmt12(data.checkin_time);
+      document.getElementById("resultTitle").textContent = "Check-in Successful";
+      document.getElementById("resultSub").textContent   = `Space ${node_id} is now active`;
+      resultCard.className = "result-card show";
+      status.textContent = "Check-in complete";
+    } else {
+      showAlert(data.detail || "Check-in failed", "error");
+      status.textContent = "Failed — try again";
+      scanning = true;
+      tick();
+    }
+  } catch(e) {
+    showAlert("Network error — check connection", "error");
+    status.textContent = "Network error — try again";
+    scanning = true;
+    tick();
+  }
+}
+
+function resetScanner() {
+  resultCard.className = "result-card";
+  status.textContent = "Ready — point at QR code";
+  scanning = true;
+  tick();
+}
+
+startCamera();
+</script>
+</body>
+</html>

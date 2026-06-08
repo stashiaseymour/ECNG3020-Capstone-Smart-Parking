@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Parking Availability Display</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .summary {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      margin-bottom: 30px;
+      font-size: 20px;
+    }
+
+    .summary div {
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .free { background: green; }
+    .reserved { background: blue; }
+    .occupied { background: red; }
+
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 25px;
+      justify-content: center;
+    }
+
+    .card {
+      width: 180px;
+      height: 120px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .FREE { background: green; }
+    .RESERVED { background: blue; }
+    .OCCUPIED { background: red; }
+
+    .node { font-size: 26px; }
+    .status { font-size: 18px; }
+  </style>
+</head>
+
+<body>
+
+<h1>Parking Availability</h1>
+
+<div class="summary">
+  <div class="free" id="freeCount">FREE: 0</div>
+  <div class="reserved" id="reservedCount">RESERVED: 0</div>
+  <div class="occupied" id="occupiedCount">OCCUPIED: 0</div>
+</div>
+
+<div class="container" id="cards"></div>
+
+<script>
+const BASE_URL = "https://smart-parking-backend-u60i.onrender.com";
+const STATUS_API        = `${BASE_URL}/api/parking/status`;
+
+async function fetchStatus() {
+  const response = await fetch(STATUS_API);
+  const data = await response.json();
+
+  let free = 0;
+  let reserved = 0;
+  let occupied = 0;
+
+  const container = document.getElementById("cards");
+  container.innerHTML = "";
+
+  for (const nodeId in data) {
+    const n = data[nodeId];
+
+    // 🚫 Ignore maintenance spaces at entrance
+    if (n.final_status === "MAINTENANCE") continue;
+
+    /* ✅ Resolve display status */
+    let displayStatus =
+      n.final_status !== "CLEAR"
+        ? n.final_status
+        : n.sensor_status;
+
+    /* 🚨 Violation counts as OCCUPIED */
+    if (n.violation === true) {
+      displayStatus = "OCCUPIED";
+    }
+
+    /* Count totals */
+    if (displayStatus === "FREE") free++;
+    else if (displayStatus === "RESERVED") reserved++;
+    else if (displayStatus === "OCCUPIED") occupied++;
+
+    const card = document.createElement("div");
+    card.className = "card " + displayStatus;
+
+    card.innerHTML = `
+      <div class="node">${nodeId}</div>
+      <div class="status">${displayStatus}</div>
+    `;
+
+    container.appendChild(card);
+  }
+
+  document.getElementById("freeCount").textContent =
+    "FREE: " + free;
+  document.getElementById("reservedCount").textContent =
+    "RESERVED: " + reserved;
+  document.getElementById("occupiedCount").textContent =
+    "OCCUPIED: " + occupied;
+}
+
+fetchStatus();
+setInterval(fetchStatus, 1000);
+</script>
+
+</body>
+</html>
